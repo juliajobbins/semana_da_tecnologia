@@ -1,1 +1,396 @@
-abc
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pac-Man — Sakura Run (Tema Anime)</title>
+  <style>
+    :root{
+      --bg:#0b1020; --wall1:#f8c6d8; --wall2:#ffd7e8; --pellet:#ffc0cb; --power:#ff7fbf; --text:#fff;
+      --tile:24px;
+    }
+    html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;color:var(--text);background:linear-gradient(180deg,#071026 0%, #0b1630 100%);}
+    .wrap{display:flex;gap:16px;align-items:flex-start;justify-content:center;padding:18px;}
+    .ui{width:320px}
+    h1{margin:0 0 10px;font-size:20px;letter-spacing:0.6px}
+    .panel{background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));padding:12px;border-radius:12px;box-shadow:0 6px 20px rgba(4,6,20,0.6);}
+    canvas{background:linear-gradient(180deg,#071022, #021024);display:block;border-radius:10px;box-shadow:0 8px 30px rgba(2,6,16,0.7);}
+    .meta{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:8px}
+    .score{font-weight:700}
+    .small{font-size:13px;color:#dfe7ff99}
+    .controls{margin-top:10px;font-size:13px}
+    button{background:linear-gradient(180deg,#ff9ec9,#ff79b4);border:none;padding:8px 12px;border-radius:8px;color:#111;font-weight:700;cursor:pointer}
+    footer{margin-top:10px;font-size:12px;color:#c7d7ff88}
+    .credits{font-size:12px;color:#c7d7ff88;margin-top:8px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="panel">
+      <h1>PAC-MAN — SAKURA RUN 🌸 (Tema Anime)</h1>
+      <div class="small">Tudo com estética anime: sakura, kawaii ghosts e pellets de narutomaki.</div>
+      <canvas id="game" width="616" height="616"></canvas>
+      <div class="meta">
+        <div>
+          <div class="score">Pontuação: <span id="score">0</span></div>
+          <div class="small">Vidas: <span id="lives">3</span></div>
+        </div>
+        <div>
+          <div class="small">Fase: <span id="level">1</span></div>
+        </div>
+      </div>
+      <div class="controls">Controles: setas / WASD — Colete todos os <strong>sakura-narutomaki</strong> para limpar a fase.</div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button id="restart">Reiniciar</button>
+        <button id="hint">Dica Kawaii</button>
+      </div>
+      <div class="credits">Design: Tema anime (sakura, chibi, narutomaki). Jogo simples em HTML5 + JS — sem bibliotecas.</div>
+    </div>
+  </div>
+
+<script>
+// --- Pac-Man simplificado com tema anime (corrigido) ---
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const scoreEl = document.getElementById('score');
+const livesEl = document.getElementById('lives');
+const levelEl = document.getElementById('level');
+const restartBtn = document.getElementById('restart');
+const hintBtn = document.getElementById('hint');
+
+const TILE = 28; // grid tile size
+const COLS = 21; // keep odd to center
+const ROWS = 21;
+const WIDTH = COLS*TILE;
+const HEIGHT = ROWS*TILE;
+canvas.width = WIDTH; canvas.height = HEIGHT;
+
+// Map legend: 0 wall, 1 pellet, 2 empty, 3 power-pellet
+const MAP_TEMPLATE = [
+  "000000000000000000000",
+  "011111111111111111110",
+  "010001000010001000010",
+  "013011111111111100310",
+  "010001000010001000010",
+  "011111111111111111110",
+  "010001010000010100010",
+  "011111010111010111110",
+  "000101010010010101000",
+  "111111111111111111111",
+  "000101010010010101000",
+  "011111010111010111110",
+  "010001010000010100010",
+  "011111111111111111110",
+  "010001000010001000010",
+  "013011111111111100310",
+  "010001000010001000010",
+  "011111111111111111110",
+  "000000000000000000000",
+  "000000000000000000000",
+  "000000000000000000000",
+];
+
+let map = [];
+function loadMap(){
+  map = [];
+  for(let r=0;r<ROWS;r++){
+    const row = [];
+    const line = MAP_TEMPLATE[r] || ''.padEnd(COLS,'0');
+    for(let c=0;c<COLS;c++){
+      const ch = line[c]||'0';
+      if(ch==='0') row.push(0);
+      else if(ch==='1') row.push(1);
+      else if(ch==='2') row.push(2);
+      else if(ch==='3') row.push(3);
+      else row.push(0);
+    }
+    map.push(row);
+  }
+}
+
+// Player (Pac-kawaii)
+const player = {
+  x: 10.5, y: 15.5, // grid coords (centered)
+  dir: {x:0,y:0}, nextDir:{x:0,y:0}, speed:0.12, radius: TILE*0.45
+};
+
+// Ghosts
+const ghostColors = ['#ff6b6b','#6b8cff','#ffd36b','#9b6bff'];
+let ghosts = [];
+function resetGhosts(){
+  ghosts = [
+    {x:10.5,y:9.5,dir:{x:0,y:0},speed:0.08,scatter:true,color:ghostColors[0]},
+    {x:9.5,y:9.5,dir:{x:0,y:0},speed:0.075,scatter:true,color:ghostColors[1]},
+    {x:11.5,y:9.5,dir:{x:0,y:0},speed:0.07,scatter:true,color:ghostColors[2]},
+    {x:10.5,y:8.5,dir:{x:0,y:0},speed:0.065,scatter:true,color:ghostColors[3]}
+  ];
+}
+
+let score=0,lives=3,level=1;let gameOver=false;let pelletsLeft=0;let powerMode=false;let powerTimer=0;
+
+function init(){
+  loadMap();
+  // count pellets
+  pelletsLeft=0;
+  for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(map[r][c]===1||map[r][c]===3) pelletsLeft++;
+  player.x=10.5;player.y=15.5;player.dir={x:0,y:0};player.nextDir={x:0,y:0};
+  resetGhosts();
+  score=0;lives=3;level=1;gameOver=false;powerMode=false;powerTimer=0;
+  updateUI();
+  last = performance.now(); // reset timing
+  requestAnimationFrame(loop);
+}
+
+function restart(){
+  loadMap();
+  pelletsLeft=0;for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(map[r][c]===1||map[r][c]===3) pelletsLeft++;
+  player.x=10.5;player.y=15.5;player.dir={x:0,y:0};player.nextDir={x:0,y:0};
+  resetGhosts();score=0;lives=3;gameOver=false;powerMode=false;powerTimer=0;updateUI();
+}
+
+// Helpers
+function tileAt(x,y){
+  const c=Math.floor(x);const r=Math.floor(y);
+  if(r<0||r>=ROWS||c<0||c>=COLS) return 0; return map[r][c];
+}
+function isWallAt(x,y){
+  const c=Math.floor(x);const r=Math.floor(y);
+  if(r<0||r>=ROWS||c<0||c>=COLS) return true; return map[r][c]===0;
+}
+
+// Movement and collisions
+function tryTurn(){
+  if(player.nextDir.x===0 && player.nextDir.y===0) return;
+
+  // First: if player is stopped (dir = 0), allow immediate movement if the next tile is free
+  const testNx = player.x + player.nextDir.x * 0.5;
+  const testNy = player.y + player.nextDir.y * 0.5;
+  if((player.dir.x === 0 && player.dir.y === 0) && !isWallAt(testNx,testNy)){
+    player.dir = {...player.nextDir};
+    player.nextDir = {x:0,y:0};
+    return;
+  }
+
+  // Otherwise, only allow turning when sufficiently centered on the perpendicular axis (classic Pac-Man behavior)
+  const roundedX = Math.abs(player.x - Math.round(player.x))<0.15;
+  const roundedY = Math.abs(player.y - Math.round(player.y))<0.15;
+  if((player.nextDir.x!==0 && roundedY) || (player.nextDir.y!==0 && roundedX)){
+    const nx = player.x + player.nextDir.x*0.5;
+    const ny = player.y + player.nextDir.y*0.5;
+    if(!isWallAt(nx,ny)){
+      player.dir = {...player.nextDir};
+      player.nextDir={x:0,y:0};
+    }
+  }
+}
+
+function movePlayer(dt){
+  tryTurn();
+  // dt is normalized to ~1 for 60fps (see loop). Use it directly.
+  const nx = player.x + player.dir.x * player.speed * dt;
+  const ny = player.y + player.dir.y * player.speed * dt;
+  if(!isWallAt(nx, ny)){
+    player.x = nx; player.y = ny;
+  } else {
+    // stop when hitting wall (no further movement)
+  }
+  // collect pellets
+  const r = Math.floor(player.y); const c = Math.floor(player.x);
+  if(map[r] && (map[r][c]===1 || map[r][c]===3)){
+    if(map[r][c]===1){ score += 10; }
+    else if(map[r][c]===3){ score += 50; powerMode=true; powerTimer=600; // frames
+      // make ghosts vulnerable
+      ghosts.forEach(g=>g.vulnerable=true);
+    }
+    map[r][c]=2; pelletsLeft--; updateUI();
+    // small sound
+    playBeep(1200,0.03);
+  }
+}
+
+// Ghost AI: simple random walker with preference to not reverse
+function moveGhost(g,dt){
+  if(!g.dir || Math.random() < 0.02){
+    const choices=[];
+    const dirs=[{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}];
+    dirs.forEach(d=>{
+      const nx=g.x + d.x*0.6; const ny=g.y + d.y*0.6;
+      if(!isWallAt(nx,ny)){
+        if(g.dir && d.x===-g.dir.x && d.y===-g.dir.y) return;
+        choices.push(d);
+      }
+    });
+    if(choices.length) g.dir=choices[Math.floor(Math.random()*choices.length)];
+  }
+  if(g.dir){
+    const nx=g.x + g.dir.x * g.speed * dt;
+    const ny=g.y + g.dir.y * g.speed * dt;
+    if(!isWallAt(nx,ny)){
+      g.x = nx; g.y = ny;
+    } else {
+      g.dir = null;
+    }
+  }
+}
+
+function checkCollisions(){
+  ghosts.forEach(g=>{
+    const dx = g.x - player.x; const dy = g.y - player.y; const dist2 = dx*dx + dy*dy;
+    if(dist2 < 0.35){
+      if(powerMode && g.vulnerable){
+        // eat ghost
+        score += 200; // bonus
+        g.x=10.5; g.y=9.5; g.vulnerable=false;
+        playBeep(600,0.05);
+      } else {
+        // lose life
+        loseLife();
+      }
+      updateUI();
+    }
+  });
+}
+
+function loseLife(){
+  lives--; playBeep(200,0.15); if(lives<=0){ gameOver=true; }
+  // reset positions
+  player.x=10.5; player.y=15.5; player.dir={x:0,y:0}; player.nextDir={x:0,y:0};
+  resetGhosts();
+}
+
+// Drawing helpers (anime-style)
+function drawWall(x,y){
+  const px = x*TILE; const py = y*TILE;
+  const g = ctx.createLinearGradient(px,py,px+TILE,py+TILE);
+  g.addColorStop(0,'#ffd7e8'); g.addColorStop(1,'#f8c6d8');
+  ctx.fillStyle=g; ctx.fillRect(px+2,py+2,TILE-4,TILE-4);
+  ctx.fillStyle='#ff89b6';
+  ctx.beginPath(); ctx.ellipse(px+TILE*0.25,py+TILE*0.25,2,3,0,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(px+TILE*0.7,py+TILE*0.6,2,3,0,0,Math.PI*2); ctx.fill();
+}
+
+function drawPellet(x,y){
+  const px = x*TILE + TILE/2; const py = y*TILE + TILE/2;
+  ctx.save(); ctx.translate(px,py);
+  ctx.beginPath(); ctx.arc(0,0,3,0,Math.PI*2); ctx.fillStyle='#fff'; ctx.fill();
+  ctx.beginPath(); ctx.moveTo(0,-2); ctx.arc(0,0,2, -Math.PI/2, Math.PI*3/2); ctx.fillStyle='#ff5ea3'; ctx.fill();
+  ctx.restore();
+}
+function drawPower(x,y){
+  const px = x*TILE + TILE/2; const py = y*TILE + TILE/2;
+  ctx.save(); ctx.translate(px,py);
+  ctx.beginPath(); ctx.arc(0,0,7,0,Math.PI*2); ctx.fillStyle='#ffb6db'; ctx.fill();
+  ctx.fillStyle='#fff'; ctx.font='10px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('🍥',0,0);
+  ctx.restore();
+}
+
+function drawPlayer(){
+  const px = player.x * TILE; const py = player.y * TILE;
+  ctx.beginPath(); ctx.arc(px,py,player.radius*0.9,0,Math.PI*2); ctx.fillStyle='#ffef6b'; ctx.fill();
+  ctx.fillStyle='#222'; ctx.beginPath(); ctx.ellipse(px-6,py-4,4,6,0,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(px+6,py-4,4,6,0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#fff'; ctx.beginPath(); ctx.ellipse(px-5,py-6,1.5,2.5,0,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(px+7,py-6,1.5,2.5,0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#ffb0c0'; ctx.beginPath(); ctx.ellipse(px-9,py+4,3,2,0,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(px+9,py+4,3,2,0,0,Math.PI*2); ctx.fill();
+}
+
+function drawGhost(g){
+  const px = g.x*TILE; const py = g.y*TILE;
+  const w = TILE*0.9; const h = TILE*0.9;
+  ctx.save(); ctx.translate(px,py);
+  ctx.beginPath(); ctx.moveTo(-w/2,h/6); ctx.arc(0,-h/6,w/2,Math.PI,2*Math.PI); ctx.lineTo(w/4,h/2); ctx.quadraticCurveTo(0,h/3,-w/4,h/2); ctx.closePath();
+  ctx.fillStyle = g.vulnerable ? '#bce7ff' : g.color; ctx.fill();
+  ctx.fillStyle='#fff'; ctx.beginPath(); ctx.ellipse(-6, -2, 5, 7, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(6, -2, 5, 7, 0, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle='#222'; ctx.beginPath(); ctx.ellipse(-6, -1, 2.5, 3.5, 0, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(6, -1, 2.5, 3.5, 0, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle='#ff6b6b'; ctx.fillRect(-3,6,6,2);
+  ctx.restore();
+}
+
+// Audio (tiny beeps)
+const audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+function playBeep(freq,vol){
+  try{
+    const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
+    o.type='sine'; o.frequency.value = freq; g.gain.value = vol; o.connect(g); g.connect(audioCtx.destination); o.start();
+    setTimeout(()=>{ o.stop(); },80);
+  }catch(e){}
+}
+
+// Main loop
+let last = performance.now();
+function loop(now){
+  // normalize delta to ~1 = one frame at 60fps
+  const ms = Math.min(60, now - last);
+  const dt = ms / (1000 / 60); // dt ≈ 1 when frame delta ~16.66ms
+  last = now;
+
+  if(!gameOver){
+    update(dt);
+    render();
+    requestAnimationFrame(loop);
+  } else {
+    render();
+    ctx.fillStyle='rgba(0,0,0,0.6)'; ctx.fillRect(0,HEIGHT/2-40,WIDTH,80);
+    ctx.fillStyle='#fff'; ctx.font='28px sans-serif'; ctx.textAlign='center'; ctx.fillText('Game Over — SAKURA RUN', WIDTH/2, HEIGHT/2);
+  }
+}
+
+function update(dt){
+  movePlayer(dt);
+  ghosts.forEach(g=>moveGhost(g,dt));
+  checkCollisions();
+  if(powerMode){ powerTimer -= dt; if(powerTimer<=0){ powerMode=false; ghosts.forEach(g=>g.vulnerable=false); }}
+  if(pelletsLeft<=0){ // next level
+    level++; levelEl.textContent = level; loadMap(); pelletsLeft=0; for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(map[r][c]===1||map[r][c]===3) pelletsLeft++;
+    player.x=10.5; player.y=15.5; resetGhosts();
+  }
+}
+
+function render(){
+  ctx.clearRect(0,0,WIDTH,HEIGHT);
+  const bg = ctx.createLinearGradient(0,0,0,HEIGHT);
+  bg.addColorStop(0,'#071022'); bg.addColorStop(1,'#00121f'); ctx.fillStyle=bg; ctx.fillRect(0,0,WIDTH,HEIGHT);
+
+  // draw map
+  for(let r=0;r<ROWS;r++){
+    for(let c=0;c<COLS;c++){
+      const v = map[r][c];
+      if(v===0) drawWall(c,r);
+      else if(v===1) drawPellet(c,r);
+      else if(v===3) drawPower(c,r);
+    }
+  }
+  // decorative sakura petals
+  for(let i=0;i<7;i++){ ctx.fillStyle='rgba(255,140,180,0.05)'; ctx.beginPath(); ctx.ellipse( (i*97)%WIDTH, (i*61)%HEIGHT, 6,3, Math.sin((Date.now()/600+i)/2),0,Math.PI*2); ctx.fill(); }
+
+  // draw ghosts & player
+  ghosts.forEach(g=>drawGhost(g));
+  drawPlayer();
+}
+
+// Input
+window.addEventListener('keydown',e=>{
+  const key = e.key.toLowerCase();
+  if(key === 'arrowleft' || key === 'a'){ player.nextDir={x:-1,y:0}; e.preventDefault(); }
+  else if(key === 'arrowright' || key === 'd'){ player.nextDir={x:1,y:0}; e.preventDefault(); }
+  else if(key === 'arrowup' || key === 'w'){ player.nextDir={x:0,y:-1}; e.preventDefault(); }
+  else if(key === 'arrowdown' || key === 's'){ player.nextDir={x:0,y:1}; e.preventDefault(); }
+
+  // resume audio context if needed
+  if(audioCtx.state==='suspended') audioCtx.resume();
+});
+
+restartBtn.addEventListener('click',()=>{ restart(); });
+hintBtn.addEventListener('click',()=>{ alert('Dica Kawaii: deixe os fantasmas entrarem em corredores longos quando estiver em power-mode! Colete os brotos 🍥 para entrar em modo poderoso.'); });
+
+function updateUI(){ scoreEl.textContent = score; livesEl.textContent = lives; levelEl.textContent = level; }
+
+// start
+init();
+</script>
+</body>
+</html>
