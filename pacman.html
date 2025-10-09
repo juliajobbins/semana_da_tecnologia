@@ -42,7 +42,6 @@
       <div class="controls">Controles: setas / WASD — Colete todos os <strong>sakura-narutomaki</strong> para limpar a fase.</div>
       <div style="display:flex;gap:8px;margin-top:10px">
         <button id="restart">Reiniciar</button>
-        <button id="hint">Dica Kawaii</button>
       </div>
       <div class="credits">Design: Tema anime (sakura, chibi, narutomaki). Jogo simples em HTML5 + JS — sem bibliotecas.</div>
     </div>
@@ -385,7 +384,6 @@ window.addEventListener('keydown',e=>{
 });
 
 restartBtn.addEventListener('click',()=>{ restart(); });
-hintBtn.addEventListener('click',()=>{ alert('Dica Kawaii: deixe os fantasmas entrarem em corredores longos quando estiver em power-mode! Colete os brotos 🍥 para entrar em modo poderoso.'); });
 
 function updateUI(){ scoreEl.textContent = score; livesEl.textContent = lives; levelEl.textContent = level; }
 

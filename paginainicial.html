@@ -1,1 +1,174 @@
-abc
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Winx Games</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #ffe8f2;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #fec3dd;
+            padding: 30px;
+            border-bottom: 3px solid #e69cbf;
+        }
+        header img {
+            max-width: 400px;
+            height: auto;
+        }
+        h2 {
+            color: #995f79;
+            margin-top: 30px;
+        }
+        .games {
+            margin-top: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 40px;
+        }
+        .game-card {
+            text-decoration: none;
+            color: #6e3f55;
+            font-weight: bold;
+            font-size: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.3s ease-in-out;
+        }
+        .game-card img {
+            width: 120px;
+            margin-bottom: 10px;
+            transition: transform 0.3s ease-in-out;
+        }
+        .game-card:hover,
+        .game-card:focus {
+            transform: rotate(5deg) scale(1.05);
+        }
+        footer {
+            margin-top: 60px;
+            padding: 15px;
+            background-color: #fec3dd;
+            color: #6e3f55;
+        }
+
+        /* Botão info */
+        .info-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #fec3dd;
+            color: #6e3f55;
+            font-size: 22px;
+            padding: 10px 14px;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+            z-index: 1000;
+        }
+        .info-button:hover {
+            transform: scale(1.1);
+        }
+
+        /* Caixa de informações */
+        .info-box {
+            display: none;
+            position: fixed;
+            bottom: 70px;
+            right: 20px;
+            width: 280px;
+            background: #ffe5ed;
+            border: 2px solid #e69cbf;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 10px rgba(184, 0, 113, 0.336);
+            z-index: 1000;
+            text-align: left;
+        }
+        .info-box h2 {
+            margin: 0 0 10px;
+            font-size: 16px;
+            color: #e69cbf;
+        }
+        .info-box ul {
+            padding-left: 20px;
+            margin: 0;
+            font-size: 14px;
+        }
+        .info-box button {
+            margin-top: 10px;
+            background: #fec3dd;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .info-box button:hover {
+            background: #e69cbf;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="winxgames.png" alt="Winx Games Logo">
+    </header>
+
+    <h2>Escolha seu jogo favorito 💖</h2>
+
+    <div class="games">
+        <a href="pacman.html" class="game-card">
+            <img src="pacman.png" alt="Pac-Man">
+            <span>Pac-Man</span>
+        </a>
+        <a href="passarinho.html" class="game-card">
+            <img src="passarinho.png" alt="passarinho">
+            <span>FlappyBird</span>
+        </a>
+        <a href="cobrinha.html" class="game-card">
+            <img src="cobrinha.png" alt="Cobrinha">
+            <span>Cobrinha</span>
+        </a>
+        <a href="futebol.html" class="game-card">
+            <img src="futebol.png" alt="Futebol">
+            <span>Futebol Legal</span>
+        </a>            
+    </div>
+
+    <footer>
+        <p>Desenvolvido por Eloah, Hayssa, Julia, Kemily e Leonardo do 3ºDS ✨(✿◠‿◠)✨</p>
+    </footer>
+
+    <!-- Botão info -->
+    <div class="info-button" onclick="toggleInfo()">!</div>
+
+    <!-- Caixa de Créditos -->
+    <div class="info-box" id="infoBox">
+        <h2>informações</h2>
+        <p>Este site foi feito como parte do projeto da Semana Técnica pelo grupo de iniciação.</p>
+        <p><strong>Créditos:</strong></p>
+        <ul>
+            <li>Eloah (Desenhos e home page)</li>
+            <li>Kemily (Pac-Man)</li>
+            <li>Julia (Mario/passarinho)</li>
+            <li>Hayssa (Cobrinha)</li>
+            <li>Leonardo (Futebol)</li>
+        </ul>
+    </div>
+
+    <script>
+    function toggleInfo() {
+        const box = document.getElementById("infoBox");
+        box.style.display = box.style.display === "block" ? "none" : "block";
+    }
+    </script>    
+</body>
+</html>
