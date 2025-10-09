@@ -6,7 +6,10 @@
   <title>Flappy Bird</title>
   <style>
     :root{
-      --bg:#f8d7e8;
+      --bg:#f8d
+
+
+7e8;
       --ground:#f4a6c6;
       --pipe:#e38eb5;
       --ui:#ffffffcc;
@@ -38,7 +41,7 @@
         <h2 style="margin:0 0 8px">Flappy Bird</h2>
         <div class="small" id="panelText">Toque / clique / Espaço para pular. Evite os canos — veja quantos pontos você faz!</div>
         <button id="startBtn">Começar</button>
-        <div class="small" style="margin-top:10px">Use o botão de reinício quando perder. O jogo salva seu melhor score localmente.</div>
+        <div class="small" style="margin-top:10px">O jogo salva seu melhor score localmente.</div>
       </div>
     </div>
 
@@ -81,10 +84,21 @@ const bird = {
 const pipeGap = Math.round(150 * DPR);
 const pipeWidth = Math.round(56 * DPR);
 const pipeSpeed = Math.round(2.4 * DPR);
-const pipeSpawnInterval = 110;
-
+const pipeSpawnInterval = 180; // colunas com distância equilibrada (~2s)
 const groundHeight = Math.round(60 * DPR);
 
+// Música de fundo
+const bgMusic = new Audio('jellyous.mp3');
+bgMusic.loop = true;
+bgMusic.volume = 0.4;
+
+// Tocar música após o primeiro clique
+function playMusic() {
+  bgMusic.play().catch(()=>{ console.log('Clique no jogo para iniciar a música'); });
+}
+document.addEventListener('click', playMusic, { once: true });
+
+// Efeito sonoro
 const AudioCtx = typeof AudioContext !== 'undefined' ? new AudioContext() : null;
 function beep(freq=440, time=0.06){
   if(!AudioCtx) return;
@@ -96,10 +110,13 @@ function beep(freq=440, time=0.06){
   o.start(); o.stop(AudioCtx.currentTime + time);
 }
 
+// Geração de canos
 function spawnPipe(){
-  const topH = Math.round((60 + Math.random() * (H - groundHeight - 200)/DPR) * DPR);
-  const gapStart = topH + Math.round(30*DPR);
-  pipes.push({x: W + pipeWidth, top: topH, bottom: gapStart + pipeGap});
+  const minPipeHeight = 80 * DPR;
+  const maxPipeHeight = H - groundHeight - pipeGap - 80 * DPR;
+  const topH = Math.round(minPipeHeight + Math.random() * (maxPipeHeight - minPipeHeight));
+  const bottomY = topH + pipeGap;
+  pipes.push({x: W + pipeWidth, top: topH, bottom: bottomY, passed: false});
 }
 
 function reset(){
@@ -160,7 +177,12 @@ function update(){
   if(frame % pipeSpawnInterval === 0) spawnPipe();
   for(let i = pipes.length-1; i>=0; i--){
     pipes[i].x -= pipeSpeed;
-    if(!pipes[i].passed && pipes[i].x + pipeWidth < bird.x){ pipes[i].passed = true; score++; document.getElementById('score').textContent = score; beep(700 + (score*30), 0.02); }
+    if(!pipes[i].passed && pipes[i].x + pipeWidth < bird.x){ 
+      pipes[i].passed = true; 
+      score++; 
+      document.getElementById('score').textContent = score; 
+      beep(700 + (score*30), 0.02); 
+    }
     if(pipes[i].x + pipeWidth < -50) pipes.splice(i,1);
   }
   if(bird.y + bird.h/2 > H - groundHeight){ gameOver(); }
@@ -179,13 +201,16 @@ function draw(){
   g.addColorStop(0,'#ffd6eb'); g.addColorStop(1,'#f6a5c0');
   ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
 
+  // nuvens
+  ctx.save();
+  ctx.globalAlpha = 0.95;
   for(let i=0;i<3;i++){
-    const cx = ((frame*0.25) + i*220*DPR) % (W + 200*DPR) - 100*DPR;
-    ctx.globalAlpha = 0.9 - i*0.15;
-    drawCloud(cx, 60*DPR + i*40*DPR, 1.0 + i*0.15);
+    const cx = ((frame*0.25) + i*280*DPR) % (W + 300*DPR) - 150*DPR;
+    drawCloud(cx, 80*DPR + i*50*DPR, 1.0 + i*0.2);
   }
-  ctx.globalAlpha = 1;
+  ctx.restore();
 
+  // canos
   for(const p of pipes){
     ctx.fillStyle = '#e38eb5';
     ctx.fillRect(p.x, 0, pipeWidth, p.top);
@@ -195,9 +220,14 @@ function draw(){
     ctx.fillRect(p.x, p.bottom, pipeWidth, 8*DPR);
   }
 
-  ctx.fillStyle = '#f4a6c6';
+  // chão
+  const grd = ctx.createLinearGradient(0, H - groundHeight, 0, H);
+  grd.addColorStop(0, '#e88fb8');
+  grd.addColorStop(1, '#d76ea3');
+  ctx.fillStyle = grd;
   ctx.fillRect(0, H - groundHeight, W, groundHeight);
 
+  // pássaro
   ctx.save();
   ctx.translate(bird.x, bird.y);
   ctx.rotate(bird.rotation);
@@ -205,38 +235,58 @@ function draw(){
   ctx.restore();
 }
 
-function drawCloud(x,y,scale=1){
-  ctx.fillStyle = 'rgba(255,255,255,0.95)';
+function drawCloud(x, y, scale = 1) {
   ctx.beginPath();
-  ctx.ellipse(x, y, 34*DPR*scale, 18*DPR*scale, 0, 0, Math.PI*2);
-  ctx.ellipse(x+28*DPR*scale, y-6*DPR*scale, 26*DPR*scale, 14*DPR*scale, 0,0,Math.PI*2);
-  ctx.ellipse(x-28*DPR*scale, y-6*DPR*scale, 26*DPR*scale, 14*DPR*scale, 0,0,Math.PI*2);
-  ctx.fill();
-}
-
-function drawBird(x,y,w,h){
-  ctx.fillStyle = '#ffe0f0';
-  roundRect(ctx, x, y, w, h, 4*DPR, true, false);
-  ctx.fillStyle = '#222'; ctx.beginPath(); ctx.ellipse(x + w*0.65, y + h*0.36, 2.8*DPR, 3.4*DPR, 0,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle = '#fff'; ctx.fillRect(x + w*0.73, y + h*0.33, 2*DPR, 1.5*DPR);
-  ctx.fillStyle = '#ff6bcb';
-  ctx.beginPath(); ctx.moveTo(x + w*0.1, y + h*0.5); ctx.lineTo(x - w*0.15, y + h*0.35); ctx.lineTo(x - w*0.15, y + h*0.65); ctx.closePath(); ctx.fill();
-  ctx.fillStyle = '#d77bb3';
-  ctx.fillRect(x + w*0.05, y - h*0.12, w*0.35, h*0.25);
-}
-
-function roundRect(ctx, x, y, w, h, r, fill, stroke){
-  if (typeof stroke === 'undefined') stroke = true;
-  if (typeof r === 'undefined') r = 5;
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.arcTo(x + w, y, x + w, y + h, r);
-  ctx.arcTo(x + w, y + h, x, y + h, r);
-  ctx.arcTo(x, y + h, x, y, r);
-  ctx.arcTo(x, y, x + w, y, r);
+  const r = 15 * DPR * scale;
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.arc(x + r * 0.8, y - r * 0.3, r * 0.9, 0, Math.PI * 2);
+  ctx.arc(x + r * 1.6, y, r * 1.1, 0, Math.PI * 2);
+  ctx.arc(x + r * 0.8, y + r * 0.4, r, 0, Math.PI * 2);
   ctx.closePath();
-  if(fill) ctx.fill();
-  if(stroke) ctx.stroke();
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.98)';
+  ctx.shadowColor = 'rgba(255, 255, 255, 0.6)';
+  ctx.shadowBlur = 8 * DPR;
+  ctx.fill();
+  ctx.shadowBlur = 0;
+}
+
+function drawBird(x, y, w, h) {
+  w *= 1.2;
+  h *= 1.2;
+  const grad = ctx.createRadialGradient(x + w * 0.5, y + h * 0.5, 2, x + w * 0.5, y + h * 0.5, w);
+  grad.addColorStop(0, '#ffb3de');
+  grad.addColorStop(1, '#ff5fb2');
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.ellipse(x + w / 2, y + h / 2, w / 2, h / 2, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = '#ff89c6';
+  ctx.beginPath();
+  ctx.ellipse(x + w * 0.45, y + h * 0.55, w * 0.25, h * 0.2, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = '#ffd15a';
+  ctx.beginPath();
+  ctx.moveTo(x + w * 0.88, y + h * 0.48);
+  ctx.lineTo(x + w * 1.05, y + h * 0.5);
+  ctx.lineTo(x + w * 0.88, y + h * 0.52);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(x + w * 0.7, y + h * 0.38, 3 * DPR, 0, Math.PI * 2);
+  ctx.fillStyle = '#222';
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(x + w * 0.72, y + h * 0.36, 1.2 * DPR, 0, Math.PI * 2);
+  ctx.fillStyle = '#fff';
+  ctx.fill();
+
+  ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+  ctx.lineWidth = 1 * DPR;
+  ctx.stroke();
 }
 
 function loop(){
