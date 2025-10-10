@@ -1,9 +1,9 @@
 # semana_da_tecnologia
 Jogos para apresentar na Semana da Tecnologica
 
-Jogos:
+🎮 Jogos:
 
-👾 Pac-Man — Sakura Run
+👾 Pac-Man — Sakura Run:
 O Pac-Man — Sakura Run é uma releitura do clássico Pac-Man, com tema inspirado na cultura japonesa e visual em tons de rosa e branco.
 O jogador controla o personagem principal, que deve percorrer o labirinto coletando pontos e evitando os fantasmas. Cada ponto aumenta a pontuação, e o objetivo é limpar todo o mapa sem ser capturado.
 O movimento do personagem é controlado pelo teclado, e a colisão com as paredes e os inimigos é calculada em tempo real.
@@ -17,7 +17,7 @@ JavaScript: controla toda a movimentação, detecção de colisão, pontuação 
 
 VS Code: ambiente usado para desenvolver e testar o código do jogo.
 
-🐤 Flappy Bird
+🐤 Flappy Bird:
 O jogo Flappy Bird é um desafio simples: o jogador controla um passarinho que precisa atravessar canos sem encostar neles. Cada vez que o pássaro passa por um par de canos, o jogador ganha um ponto.
 O personagem é controlado com toques na tela, cliques do mouse ou a tecla de espaço, que o fazem “bater as asas” e subir. Quando o jogador para de apertar, a gravidade o faz cair.
 A cada rodada, novos canos são gerados de forma aleatória, variando a altura e criando diferentes níveis de dificuldade. Se o pássaro encostar em um cano ou no chão, o jogo termina e mostra a pontuação atual e o recorde salvo localmente no navegador.
