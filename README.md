@@ -1,6 +1,23 @@
 # semana_da_tecnologia
 Jogos para apresentar na Semana da Tecnologia
 
+🌸 Tela Inicial — Winx Games
+
+A tela inicial do projeto Winx Games foi desenvolvida para funcionar como uma página de acesso principal aos quatro jogos criados pelo grupo: Pac-Man, Flappy Bird, Cobrinha e Futebol.
+O objetivo dessa tela é permitir que o usuário escolha facilmente qual jogo deseja jogar, clicando em uma das imagens interativas. Cada imagem leva diretamente ao respectivo arquivo HTML do jogo.
+Além disso, há um botão de informações (“!”) que exibe uma pequena janela com os créditos e a explicação do projeto. Essa janela aparece e desaparece ao clicar no botão, tornando a navegação mais dinâmica.
+Todos os ícones dos jogos e o logotipo “Winx Games” foram feitos 100% à mão, o que dá um toque artístico e único à apresentação.
+
+A tela inicial foi desenvolvida inteiramente com HTML, CSS e um pequeno script em JavaScript, utilizando o editor Visual Studio Code (VS Code).
+
+HTML: define a estrutura da página, incluindo o cabeçalho, as imagens dos jogos, o rodapé e o botão de informações.
+
+CSS: é responsável pelo estilo visual, com cores em tons de rosa, formatação dos textos, posicionamento dos elementos e animações quando o usuário passa o mouse sobre as imagens dos jogos.
+
+JavaScript: foi usado para criar a interação do botão de informações, permitindo que o texto apareça e desapareça quando clicado.
+
+VS Code: ambiente utilizado para escrever e testar o código do site.
+
 🎮 Jogos:
 
 👾 Pac-Man — Sakura Run:
