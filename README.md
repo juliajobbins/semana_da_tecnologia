@@ -61,9 +61,9 @@ Há ainda efeitos visuais de partículas nos chutes e sons gerados por código, 
 
 O projeto foi desenvolvido com as linguagens HTML, CSS e JavaScript, utilizando o editor Visual Studio Code (VS Code).
 
-HTML (HyperText Markup Language): responsável pela estrutura do jogo, como o campo e os elementos visuais.
+HTML: responsável pela estrutura do jogo, como o campo e os elementos visuais.
 
-CSS (Cascading Style Sheets): define o design, as cores, o posicionamento dos elementos e o visual do jogo.
+CSS: define o design, as cores, o posicionamento dos elementos e o visual do jogo.
 
 JavaScript: cria toda a lógica, como movimentação, colisões, física da bola, IA e sons.
 
