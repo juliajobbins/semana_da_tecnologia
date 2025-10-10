@@ -1,5 +1,5 @@
 # semana_da_tecnologia
-Jogos para apresentar na Semana da Tecnologica
+Jogos para apresentar na Semana da Tecnologia
 
 🎮 Jogos:
 
