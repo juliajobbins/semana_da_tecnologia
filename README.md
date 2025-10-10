@@ -4,6 +4,7 @@ Jogos para apresentar na Semana da Tecnologica
 🎮 Jogos:
 
 👾 Pac-Man — Sakura Run:
+
 O Pac-Man — Sakura Run é uma releitura do clássico Pac-Man, com tema inspirado na cultura japonesa e visual em tons de rosa e branco.
 O jogador controla o personagem principal, que deve percorrer o labirinto coletando pontos e evitando os fantasmas. Cada ponto aumenta a pontuação, e o objetivo é limpar todo o mapa sem ser capturado.
 O movimento do personagem é controlado pelo teclado, e a colisão com as paredes e os inimigos é calculada em tempo real.
