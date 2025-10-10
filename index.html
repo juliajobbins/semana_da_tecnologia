@@ -8,21 +8,21 @@
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            background-color: #ffe8f2;
+            background-color: #ffe3ef;
             margin: 0;
             padding: 0;
         }
         header {
-            background-color: #fec3dd;
+            background-color: #ffbad9;
             padding: 30px;
-            border-bottom: 3px solid #e69cbf;
+            border-bottom: 3px solid #ffc5d6;
         }
         header img {
             max-width: 400px;
             height: auto;
         }
         h2 {
-            color: #995f79;
+            color: #ff7da4;
             margin-top: 30px;
         }
         .games {
@@ -34,7 +34,7 @@
         }
         .game-card {
             text-decoration: none;
-            color: #6e3f55;
+            color: #ff7da4;
             font-weight: bold;
             font-size: 16px;
             display: flex;
@@ -54,30 +54,27 @@
         footer {
             margin-top: 60px;
             padding: 15px;
-            background-color: #fec3dd;
-            color: #6e3f55;
+            background-color: #ffbad9;
+            color: #ffbad9;
+            
         }
-
-        /* Botão info */
         .info-button {
             position: fixed;
             bottom: 20px;
             right: 20px;
-            background: #fec3dd;
             color: #6e3f55;
             font-size: 22px;
             padding: 10px 14px;
             border-radius: 50%;
             cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            background-color: #fec3dd;
+            box-shadow: 0 2px 5px rgba(207, 87, 143, 0.719);
             transition: transform 0.2s;
             z-index: 1000;
         }
         .info-button:hover {
             transform: scale(1.1);
         }
-
-        /* Caixa de informações */
         .info-box {
             display: none;
             position: fixed;
@@ -97,24 +94,7 @@
             font-size: 16px;
             color: #e69cbf;
         }
-        .info-box ul {
-            padding-left: 20px;
-            margin: 0;
-            font-size: 14px;
-        }
-        .info-box button {
-            margin-top: 10px;
-            background: #fec3dd;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-            border-radius: 6px;
-            font-size: 14px;
-        }
-        .info-box button:hover {
-            background: #e69cbf;
-            color: white;
-        }
+
     </style>
 </head>
 <body>
@@ -129,11 +109,11 @@
             <img src="pacman.png" alt="Pac-Man">
             <span>Pac-Man</span>
         </a>
-        <a href="flappybird.html" class="game-card">
+        <a href="passarinho.html" class="game-card">
             <img src="passarinho.png" alt="passarinho">
             <span>FlappyBird</span>
         </a>
-        <a href="cobrinha.html" class="game-card">
+        <a href="cobrinha/index.html" class="game-card">
             <img src="cobrinha.png" alt="Cobrinha">
             <span>Cobrinha</span>
         </a>
@@ -144,13 +124,12 @@
     </div>
 
     <footer>
-        <p>Desenvolvido por Eloah, Hayssa, Julia, Kemily e Leonardo do 3ºDS ✨(✿◠‿◠)✨</p>
+        <p>              a                                                                                                                                                                                                                                                                                                                   </p>
     </footer>
 
-    <!-- Botão info -->
+
     <div class="info-button" onclick="toggleInfo()">!</div>
 
-    <!-- Caixa de Créditos -->
     <div class="info-box" id="infoBox">
         <h2>informações</h2>
         <p>Este site foi feito como parte do projeto da Semana Técnica pelo grupo de iniciação.</p>
@@ -158,7 +137,7 @@
         <ul>
             <li>Eloah (Desenhos e home page)</li>
             <li>Kemily (Pac-Man)</li>
-            <li>Julia (Mario/passarinho)</li>
+            <li>Julia (Flappy Bird)</li>
             <li>Hayssa (Cobrinha)</li>
             <li>Leonardo (Futebol)</li>
         </ul>
