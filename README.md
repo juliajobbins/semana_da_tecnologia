@@ -4,7 +4,6 @@ Jogos para apresentar na Semana da Tecnologica
 🎮 Jogos:
 
 👾 Pac-Man — Sakura Run:
-
 O Pac-Man — Sakura Run é uma releitura do clássico Pac-Man, com tema inspirado na cultura japonesa e visual em tons de rosa e branco.
 O jogador controla o personagem principal, que deve percorrer o labirinto coletando pontos e evitando os fantasmas. Cada ponto aumenta a pontuação, e o objetivo é limpar todo o mapa sem ser capturado.
 O movimento do personagem é controlado pelo teclado, e a colisão com as paredes e os inimigos é calculada em tempo real.
@@ -34,7 +33,7 @@ JavaScript: é o responsável pela lógica de movimento, colisões, geração de
 
 VS Code: ambiente de desenvolvimento onde o código foi escrito e testado.
 
-🐍 Cobrinha Fofinha Animada
+🐍 Cobrinha Fofinha Animada:
 O jogo Cobrinha Fofinha Animada é uma versão colorida e moderna do clássico “Snake”. O jogador controla uma cobrinha que se movimenta dentro de um quadrado e deve comer frutas que aparecem aleatoriamente.
 Cada fruta coletada aumenta o tamanho da cobra e a pontuação. O jogo termina quando o jogador encosta nas bordas da tela ou no próprio corpo.
 Foram adicionados efeitos visuais com corações e brilhos, além de sons fofos que tocam quando a cobrinha come uma fruta. O plano de fundo possui animações de partículas flutuando, tornando o visual mais leve e divertido.
@@ -50,7 +49,7 @@ JavaScript: cria toda a lógica do jogo — movimentação, pontuação, geraç�
 
 VS Code: ambiente onde todo o código foi desenvolvido e testado.
 
-⚽ Top-Down Soccer
+⚽ Top-Down Soccer:
 O jogo Top-Down Soccer é um protótipo de futebol 2D visto de cima. A lógica do sistema foi pensada para simular uma partida entre dois times: o Time Azul e o Time Rosa.
 O jogador controla o Time Azul, podendo se movimentar e chutar a bola. O Time Rosa pode ser controlado por outro jogador ou pela inteligência artificial (IA), que analisa a posição da bola e decide automaticamente entre atacar, defender ou interceptar.
 O campo, a bola e os jogadores são desenhados por meio de código, e o jogo calcula colisões, velocidade e direção da bola para criar um movimento realista. Quando a bola entra no gol, o placar é atualizado automaticamente.
