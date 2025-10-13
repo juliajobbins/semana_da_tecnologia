@@ -6,29 +6,85 @@
   <title>Pac-Man — Sakura Run</title>
   <style>
     :root{
-      --bg:#0b1020; --wall1:#f8c6d8; --wall2:#ffd7e8; --pellet:#ffc0cb; --power:#ff7fbf; --text:#fff;
+      --bg:#0b1020; 
+      --wall1:#f8c6d8; 
+      --wall2:#ffd7e8; 
+      --pellet:#ffc0cb; 
+      --power:#ff7fbf; 
+      --text:#fff;
       --tile:24px;
     }
-    html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;color:var(--text);background:linear-gradient(180deg,#071026 0%, #0b1630 100%);}
-    .wrap{display:flex;gap:16px;align-items:flex-start;justify-content:center;padding:18px;}
-    .ui{width:320px}
-    h1{margin:0 0 10px;font-size:20px;letter-spacing:0.6px}
-    .panel{background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));padding:12px;border-radius:12px;box-shadow:0 6px 20px rgba(4,6,20,0.6);}
-    canvas{background:linear-gradient(180deg,#071022, #021024);display:block;border-radius:10px;box-shadow:0 8px 30px rgba(2,6,16,0.7);}
-    .meta{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:8px}
-    .score{font-weight:700}
-    .small{font-size:13px;color:#dfe7ff99}
-    .controls{margin-top:10px;font-size:13px}
-    button{background:linear-gradient(180deg,#ff9ec9,#ff79b4);border:none;padding:8px 12px;border-radius:8px;color:#111;font-weight:700;cursor:pointer}
-    footer{margin-top:10px;font-size:12px;color:#c7d7ff88}
-    .credits{font-size:12px;color:#c7d7ff88;margin-top:8px}
+    html,body{
+      height:100%;
+      margin:0;
+      font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      color:var(--text);
+      background:linear-gradient(180deg,#071026 0%, #0b1630 100%);
+    }
+    .wrap{
+      display:flex;
+      gap:16px;
+      align-items:flex-start;
+      justify-content:center;
+      padding:18px;}
+
+
+    .ui{
+      width:320px
+    }
+    h1{
+      margin:0 0 10px;
+      font-size:20px;
+      letter-spacing:0.6px
+    }
+    .panel{
+      background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+      padding:12px;border-radius:12px;box-shadow:0 6px 20px rgba(4,6,20,0.6);
+    }
+    canvas{
+      background:linear-gradient(180deg,#071022, #021024);
+      display:block;
+      border-radius:10px;
+      box-shadow:0 8px 30px rgba(2,6,16,0.7);
+    }
+    .meta{
+      display:flex;
+      gap:10px;align-items:center;
+      justify-content:space-between;
+      margin-top:8px}
+    .score{
+      font-weight:700
+    }
+    .small{
+      font-size:13px;
+      color:#dfe7ff99
+    }
+    .controls{
+      margin-top:10px;font-size:13px
+    }
+    button{
+      background:linear-gradient(180deg,#ff9ec9,#ff79b4);
+      border:none;
+      padding:12px 12px;
+      border-radius:8px;
+      color:#111;
+      font-weight:700;
+      cursor:pointer
+    }
+    footer{
+      margin-top:10px;
+      font-size:12px;
+      color:#c7d7ff88
+    }
+
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="panel">
       <h1>PAC-MAN — SAKURA RUN 🌸</h1>
-      <div class="small">Tudo com estética anime: sakura, kawaii ghosts e pellets de narutomaki.</div>
+      <div class="controls">Controles: setas / WASD — Colete todos os <strong>sakura-narutomaki</strong> para limpar a fase.</div>
+      <div style="display:flex;gap:8px;margin-top:10px">
       <canvas id="game" width="616" height="616"></canvas>
       <div class="meta">
         <div>
@@ -39,23 +95,18 @@
           <div class="small">Fase: <span id="level">1</span></div>
         </div>
       </div>
-      <div class="controls">Controles: setas / WASD — Colete todos os <strong>sakura-narutomaki</strong> para limpar a fase.</div>
-      <div style="display:flex;gap:8px;margin-top:10px">
         <button id="restart">Reiniciar</button>
-      </div>
-      <div class="credits">Design: Tema anime (sakura, chibi, narutomaki). Jogo simples em HTML5 + JS — sem bibliotecas.</div>
-    </div>
   </div>
 
 <script>
-// --- Pac-Man simplificado com tema anime (corrigido) ---
+// --- Pac-Man simplificado com tema anime (com chasing ghosts, teletransporte lateral e restart funcional) ---
+
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 const scoreEl = document.getElementById('score');
 const livesEl = document.getElementById('lives');
 const levelEl = document.getElementById('level');
 const restartBtn = document.getElementById('restart');
-const hintBtn = document.getElementById('hint');
 
 const TILE = 28; // grid tile size
 const COLS = 21; // keep odd to center
@@ -118,44 +169,42 @@ const ghostColors = ['#ff6b6b','#6b8cff','#ffd36b','#9b6bff'];
 let ghosts = [];
 function resetGhosts(){
   ghosts = [
-    {x:10.5,y:9.5,dir:{x:0,y:0},speed:0.08,scatter:true,color:ghostColors[0]},
-    {x:9.5,y:9.5,dir:{x:0,y:0},speed:0.075,scatter:true,color:ghostColors[1]},
-    {x:11.5,y:9.5,dir:{x:0,y:0},speed:0.07,scatter:true,color:ghostColors[2]},
-    {x:10.5,y:8.5,dir:{x:0,y:0},speed:0.065,scatter:true,color:ghostColors[3]}
+    {x:10.5,y:9.5,dir:{x:0,y:0},speed:0.08,scatter:true,color:ghostColors[0],vulnerable:false},
+    {x:9.5,y:9.5,dir:{x:0,y:0},speed:0.075,scatter:true,color:ghostColors[1],vulnerable:false},
+    {x:11.5,y:9.5,dir:{x:0,y:0},speed:0.07,scatter:true,color:ghostColors[2],vulnerable:false},
+    {x:10.5,y:8.5,dir:{x:0,y:0},speed:0.065,scatter:true,color:ghostColors[3],vulnerable:false}
   ];
 }
 
 let score=0,lives=3,level=1;let gameOver=false;let pelletsLeft=0;let powerMode=false;let powerTimer=0;
 
-function init(){
-  loadMap();
-  // count pellets
-  pelletsLeft=0;
-  for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(map[r][c]===1||map[r][c]===3) pelletsLeft++;
-  player.x=10.5;player.y=15.5;player.dir={x:0,y:0};player.nextDir={x:0,y:0};
-  resetGhosts();
-  score=0;lives=3;level=1;gameOver=false;powerMode=false;powerTimer=0;
-  updateUI();
-  last = performance.now(); // reset timing
-  requestAnimationFrame(loop);
+// --- NEW: ghost mode scheduler (alternates between scatter and chase) ---
+let ghostMode = 'scatter'; // 'scatter' or 'chase'
+let ghostModeTimer = 0; // frames / normalized (we'll use seconds scaled to dt)
+const MODE_CYCLE = [
+  {mode:'scatter',duration:5}, // seconds
+  {mode:'chase',duration:20},  // seconds
+  {mode:'scatter',duration:5},
+  {mode:'chase',duration:20}
+];
+let modeIndex = 0;
+function setGhostMode(m){
+  ghostMode = m;
+  // mark ghosts' scatter flag (used for some behaviors if needed)
+  ghosts.forEach(g=>g.scatter = (m==='scatter'));
 }
 
-function restart(){
-  loadMap();
-  pelletsLeft=0;for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(map[r][c]===1||map[r][c]===3) pelletsLeft++;
-  player.x=10.5;player.y=15.5;player.dir={x:0,y:0};player.nextDir={x:0,y:0};
-  resetGhosts();score=0;lives=3;gameOver=false;powerMode=false;powerTimer=0;updateUI();
+// initialize mode timer
+function initGhostMode(){
+  modeIndex = 0;
+  ghostModeTimer = MODE_CYCLE[0].duration * 60; // convert seconds -> ~frames (since dt≈1 per frame)
+  setGhostMode(MODE_CYCLE[0].mode);
 }
 
-// Helpers
-function tileAt(x,y){
-  const c=Math.floor(x);const r=Math.floor(y);
-  if(r<0||r>=ROWS||c<0||c>=COLS) return 0; return map[r][c];
-}
-function isWallAt(x,y){
-  const c=Math.floor(x);const r=Math.floor(y);
-  if(r<0||r>=ROWS||c<0||c>=COLS) return true; return map[r][c]===0;
-}
+// Helper: map tile queries
+function isWallTile(c,r){ if(r<0||r>=ROWS||c<0||c>=COLS) return true; return map[r][c]===0; }
+function tileAt(x,y){ const c=Math.floor(x);const r=Math.floor(y); if(r<0||r>=ROWS||c<0||c>=COLS) return 0; return map[r][c]; }
+function isWallAt(x,y){ const c=Math.floor(x);const r=Math.floor(y); if(r<0||r>=ROWS||c<0||c>=COLS) return true; return map[r][c]===0; }
 
 // Movement and collisions
 function tryTurn(){
@@ -164,6 +213,7 @@ function tryTurn(){
   // First: if player is stopped (dir = 0), allow immediate movement if the next tile is free
   const testNx = player.x + player.nextDir.x * 0.5;
   const testNy = player.y + player.nextDir.y * 0.5;
+  // handle wrap test for immediate movement
   if((player.dir.x === 0 && player.dir.y === 0) && !isWallAt(testNx,testNy)){
     player.dir = {...player.nextDir};
     player.nextDir = {x:0,y:0};
@@ -183,21 +233,45 @@ function tryTurn(){
   }
 }
 
+// helper to test whether we can wrap horizontally to other side at a given row
+function canWrapToRowCol(row, col){ // col may be negative or >=COLS
+  const wrappedC = ((col % COLS) + COLS) % COLS;
+  if(row<0||row>=ROWS) return false;
+  return map[row][wrappedC] !== 0;
+}
+
 function movePlayer(dt){
   tryTurn();
   // dt is normalized to ~1 for 60fps (see loop). Use it directly.
-  const nx = player.x + player.dir.x * player.speed * dt;
-  const ny = player.y + player.dir.y * player.speed * dt;
-  if(!isWallAt(nx, ny)){
-    player.x = nx; player.y = ny;
+  let nx = player.x + player.dir.x * player.speed * dt;
+  let ny = player.y + player.dir.y * player.speed * dt;
+
+  // Handle horizontal wrap (teletransporte lateral) if moving beyond edges
+  if(nx < 0 || nx >= COLS){
+    const targetRow = Math.floor(ny);
+    const wrappedCol = nx < 0 ? COLS-1 : 0;
+    if(canWrapToRowCol(targetRow, wrappedCol)){
+      // teleport player to other side keeping small offset so movement continues smoothly
+      player.x = nx < 0 ? COLS - 0.001 : 0.001;
+      player.y = ny;
+    } else {
+      // can't wrap (wall on other side) => block movement
+      // do nothing, keep player in place
+    }
   } else {
-    // stop when hitting wall (no further movement)
+    // normal movement without wrapping
+    if(!isWallAt(nx, ny)){
+      player.x = nx; player.y = ny;
+    } else {
+      // collision with wall -> stop movement (do nothing)
+    }
   }
+
   // collect pellets
   const r = Math.floor(player.y); const c = Math.floor(player.x);
   if(map[r] && (map[r][c]===1 || map[r][c]===3)){
     if(map[r][c]===1){ score += 10; }
-    else if(map[r][c]===3){ score += 50; powerMode=true; powerTimer=600; // frames
+    else if(map[r][c]===3){ score += 50; powerMode=true; powerTimer=600; // frames (~10s)
       // make ghosts vulnerable
       ghosts.forEach(g=>g.vulnerable=true);
     }
@@ -207,27 +281,98 @@ function movePlayer(dt){
   }
 }
 
-// Ghost AI: simple random walker with preference to not reverse
-function moveGhost(g,dt){
-  if(!g.dir || Math.random() < 0.02){
-    const choices=[];
-    const dirs=[{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}];
-    dirs.forEach(d=>{
-      const nx=g.x + d.x*0.6; const ny=g.y + d.y*0.6;
-      if(!isWallAt(nx,ny)){
-        if(g.dir && d.x===-g.dir.x && d.y===-g.dir.y) return;
-        choices.push(d);
-      }
-    });
-    if(choices.length) g.dir=choices[Math.floor(Math.random()*choices.length)];
+// Ghost AI: random walker + chase mode
+function moveGhost(g, dt) {
+  const dirs = [
+    {x: 1, y: 0},   // direita
+    {x: -1, y: 0},  // esquerda
+    {x: 0, y: 1},   // baixo
+    {x: 0, y: -1}   // cima
+  ];
+
+  const tileSize = 1;
+  const margin = 0.25;
+  const centeredX = Math.abs((g.x % tileSize) - tileSize / 2) < margin || Math.abs(g.x % tileSize) < margin;
+  const centeredY = Math.abs((g.y % tileSize) - tileSize / 2) < margin || Math.abs(g.y % tileSize) < margin;
+  const canTurn = centeredX && centeredY;
+
+  // --- comportamento por cor ---
+  let chaseRange = 6;
+  let changeChance = 0.02;
+  let speedFactor = 1;
+  switch (g.color) {
+    case "#ff6b6b": // vermelho raivoso
+      chaseRange = 9; changeChance = 0.01; speedFactor = 1.3; break;
+    case "#ffd36b": // amarelo aleatório
+      chaseRange = 3; changeChance = 0.05; speedFactor = 1; break;
+    case "#9b6bff": // roxo perseguidor
+      chaseRange = 8; changeChance = 0.02; speedFactor = 1.1; break;
+    case "#6b8cff": // azul lento
+      chaseRange = 5; changeChance = 0.03; speedFactor = 0.8; break;
   }
+
+  // --- função auxiliar: dentro da casinha ---
+  function inGhostHouse(g) {
+    return g.x >= 9 && g.x <= 11 && g.y >= 8 && g.y <= 10;
+  }
+
+  // --- direção inicial lateral (se parado) ---
+  if (!g.dir || (g.dir.x === 0 && g.dir.y === 0)) {
+    const sideDirs = [{x:1,y:0},{x:-1,y:0}];
+    const validDirs = sideDirs.filter(d => !isWallAt(g.x + d.x, g.y + d.y));
+    if (validDirs.length) g.dir = validDirs[Math.floor(Math.random() * validDirs.length)];
+    else {
+      const validDirs2 = dirs.filter(d => !isWallAt(g.x + d.x, g.y + d.y));
+      if(validDirs2.length) g.dir = validDirs2[Math.floor(Math.random() * validDirs2.length)];
+    }
+  }
+
+  // --- decisão de direção ---
+  if (canTurn && (!g.lastTurnTime || performance.now() - g.lastTurnTime > 250)) {
+    g.lastTurnTime = performance.now();
+
+    if (!inGhostHouse(g) && !powerMode) {
+      // perseguir se perto
+      const dx = player.x - g.x;
+      const dy = player.y - g.y;
+      const dist2 = dx*dx + dy*dy;
+
+      if(dist2 < chaseRange*chaseRange){
+        const validDirs = dirs.filter(d => !isWallAt(g.x + d.x, g.y + d.y));
+        if(validDirs.length){
+          let bestDir = g.dir; let bestDist = Infinity;
+          for(const d of validDirs){
+            const nx = g.x + d.x; const ny = g.y + d.y;
+            const newDist = (nx - player.x)**2 + (ny - player.y)**2;
+            if(newDist < bestDist){ bestDist = newDist; bestDir = d; }
+          }
+          g.dir = bestDir;
+        }
+      }
+    } else {
+      // andar aleatório
+      if (!g.dir || Math.random() < changeChance) {
+        const validDirs = dirs.filter(d=>{
+          if(g.dir && d.x === -g.dir.x && d.y === -g.dir.y) return false; // não volta atrás
+          return !isWallAt(g.x + d.x, g.y + d.y);
+        });
+        if(validDirs.length){
+          g.dir = validDirs[Math.floor(Math.random()*validDirs.length)];
+        }
+      }
+    }
+  }
+
+  // --- movimento contínuo ---
   if(g.dir){
-    const nx=g.x + g.dir.x * g.speed * dt;
-    const ny=g.y + g.dir.y * g.speed * dt;
+    const nx = g.x + g.dir.x * g.speed * speedFactor * dt;
+    const ny = g.y + g.dir.y * g.speed * speedFactor * dt;
     if(!isWallAt(nx,ny)){
       g.x = nx; g.y = ny;
     } else {
-      g.dir = null;
+      // se bateu em parede, tenta nova direção lateral válida
+      const lateralDirs = [{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}].filter(d=>!isWallAt(g.x + d.x, g.y + d.y));
+      if(lateralDirs.length) g.dir = lateralDirs[Math.floor(Math.random()*lateralDirs.length)];
     }
   }
 }
@@ -239,7 +384,8 @@ function checkCollisions(){
       if(powerMode && g.vulnerable){
         // eat ghost
         score += 200; // bonus
-        g.x=10.5; g.y=9.5; g.vulnerable=false;
+        // send ghost back to home
+        g.x = 10.5; g.y = 9.5; g.vulnerable=false; g.dir = {x:0,y:0};
         playBeep(600,0.05);
       } else {
         // lose life
@@ -255,6 +401,8 @@ function loseLife(){
   // reset positions
   player.x=10.5; player.y=15.5; player.dir={x:0,y:0}; player.nextDir={x:0,y:0};
   resetGhosts();
+  // when life lost, reset ghost mode cycle to start scatter
+  initGhostMode();
 }
 
 // Drawing helpers (anime-style)
@@ -335,10 +483,20 @@ function loop(now){
     render();
     ctx.fillStyle='rgba(0,0,0,0.6)'; ctx.fillRect(0,HEIGHT/2-40,WIDTH,80);
     ctx.fillStyle='#fff'; ctx.font='28px sans-serif'; ctx.textAlign='center'; ctx.fillText('Game Over — SAKURA RUN', WIDTH/2, HEIGHT/2);
+    // Show hint to click Reiniciar (button already visible in UI)
   }
 }
 
 function update(dt){
+  // update ghost global mode timer
+  ghostModeTimer -= dt;
+  if(ghostModeTimer <= 0){
+    // advance cycle
+    modeIndex = (modeIndex + 1) % MODE_CYCLE.length;
+    ghostModeTimer = MODE_CYCLE[modeIndex].duration * 60;
+    setGhostMode(MODE_CYCLE[modeIndex].mode);
+  }
+
   movePlayer(dt);
   ghosts.forEach(g=>moveGhost(g,dt));
   checkCollisions();
@@ -346,6 +504,7 @@ function update(dt){
   if(pelletsLeft<=0){ // next level
     level++; levelEl.textContent = level; loadMap(); pelletsLeft=0; for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(map[r][c]===1||map[r][c]===3) pelletsLeft++;
     player.x=10.5; player.y=15.5; resetGhosts();
+    initGhostMode();
   }
 }
 
@@ -383,12 +542,39 @@ window.addEventListener('keydown',e=>{
   if(audioCtx.state==='suspended') audioCtx.resume();
 });
 
+// Restart logic: reset everything and restart the loop (works when gameOver true or during play)
 restartBtn.addEventListener('click',()=>{ restart(); });
 
 function updateUI(){ scoreEl.textContent = score; livesEl.textContent = lives; levelEl.textContent = level; }
 
+function init(){
+  loadMap();
+  // count pellets
+  pelletsLeft=0;
+  for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(map[r][c]===1||map[r][c]===3) pelletsLeft++;
+  player.x=10.5;player.y=15.5;player.dir={x:0,y:0};player.nextDir={x:0,y:0};
+  resetGhosts();
+  score=0;lives=3;level=1;gameOver=false;powerMode=false;powerTimer=0;
+  updateUI();
+  initGhostMode();
+  last = performance.now(); // reset timing
+  requestAnimationFrame(loop);
+}
+
+function restart(){
+  loadMap();
+  pelletsLeft=0;for(let r=0;r<ROWS;r++) for(let c=0;c<COLS;c++) if(map[r][c]===1||map[r][c]===3) pelletsLeft++;
+  player.x=10.5;player.y=15.5;player.dir={x:0,y:0};player.nextDir={x:0,y:0};
+  resetGhosts();score=0;lives=3;gameOver=false;powerMode=false;powerTimer=0;updateUI();
+  initGhostMode();
+  last = performance.now();
+  // ensure the loop restarts if it was stopped by gameOver
+  requestAnimationFrame(loop);
+}
+
 // start
 init();
+
 </script>
 </body>
 </html>
