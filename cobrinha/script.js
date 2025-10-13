@@ -226,5 +226,3 @@ function startGame(speed = 150) {
   clearInterval(gameInterval);
   gameInterval = setInterval(draw, speed);
 }
-
-startGame(150);
