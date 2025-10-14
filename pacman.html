@@ -73,15 +73,15 @@
     }
   
     .anime-btn {
-      padding: 4px 14px;          /* altura menor, largura proporcional */
-      font-size: 14px;             /* fonte menor */
+      padding: 4px 14px;
+      font-size: 14px; 
       font-weight: 700;
-      border-radius: 10px;         /* cantos arredondados */
+      border-radius: 10px; 
       border: none;
       cursor: pointer;
-      background: linear-gradient(180deg, #ff9ec9, #ff79b4); /* gradient rosa anime */
+      background: linear-gradient(180deg, #ff9ec9, #ff79b4);
       color: #111;
-      box-shadow: 0 4px 10px rgba(255, 105, 180, 0.4); /* sombra suave */
+      box-shadow: 0 4px 10px rgba(255, 105, 180, 0.4);
       transition: transform 0.1s, box-shadow 0.2s;
     }
 
@@ -161,7 +161,6 @@
   </div>
 
 <script>
-// --- Pac-Man simplificado com tema anime (com chasing ghosts, teletransporte lateral e restart funcional) ---
 
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
@@ -170,14 +169,14 @@ const livesEl = document.getElementById('lives');
 const levelEl = document.getElementById('level');
 const restartBtn = document.getElementById('restart');
 
-const TILE = 28; // grid tile size
-const COLS = 21; // keep odd to center
+const TILE = 28; 
+const COLS = 21;
 const ROWS = 21;
 const WIDTH = COLS*TILE;
 const HEIGHT = ROWS*TILE;
 canvas.width = WIDTH; canvas.height = HEIGHT;
 
-// Map legend: 0 wall, 1 pellet, 2 empty, 3 power-pellet
+// Legenda do mapa: 0 parede, 1 bolinhas, 2 vazio, 3 poder especial
 const MAP_TEMPLATE = [
   "000000000000000000000",
   "011111111111111111110",
@@ -220,13 +219,13 @@ function loadMap(){
   }
 }
 
-// Player (Pac-kawaii)
+// Player
 const player = {
-  x: 10.5, y: 15.5, // grid coords (centered)
+  x: 10.5, y: 15.5,
   dir: {x:0,y:0}, nextDir:{x:0,y:0}, speed:0.12, radius: TILE*0.45
 };
 
-// Ghosts
+// Fantasmas
 const ghostColors = ['#ff6b6b','#6b8cff','#ffd36b','#9b6bff'];
 let ghosts = [];
 function resetGhosts(){
@@ -240,49 +239,45 @@ function resetGhosts(){
 
 let score=0,lives=3,level=1;let gameOver=false;let pelletsLeft=0;let powerMode=false;let powerTimer=0;
 
-// --- NEW: ghost mode scheduler (alternates between scatter and chase) ---
-let ghostMode = 'scatter'; // 'scatter' or 'chase'
-let ghostModeTimer = 0; // frames / normalized (we'll use seconds scaled to dt)
+let ghostMode = 'scatter';
+let ghostModeTimer = 0; 
 const MODE_CYCLE = [
-  {mode:'scatter',duration:5}, // seconds
-  {mode:'chase',duration:20},  // seconds
+  {mode:'scatter',duration:5}, // segundos
+  {mode:'chase',duration:20},
   {mode:'scatter',duration:5},
   {mode:'chase',duration:20}
 ];
 let modeIndex = 0;
 function setGhostMode(m){
   ghostMode = m;
-  // mark ghosts' scatter flag (used for some behaviors if needed)
+
   ghosts.forEach(g=>g.scatter = (m==='scatter'));
 }
 
-// initialize mode timer
+
 function initGhostMode(){
   modeIndex = 0;
-  ghostModeTimer = MODE_CYCLE[0].duration * 60; // convert seconds -> ~frames (since dt≈1 per frame)
+  ghostModeTimer = MODE_CYCLE[0].duration * 60;
   setGhostMode(MODE_CYCLE[0].mode);
 }
 
-// Helper: map tile queries
+
 function isWallTile(c,r){ if(r<0||r>=ROWS||c<0||c>=COLS) return true; return map[r][c]===0; }
 function tileAt(x,y){ const c=Math.floor(x);const r=Math.floor(y); if(r<0||r>=ROWS||c<0||c>=COLS) return 0; return map[r][c]; }
 function isWallAt(x,y){ const c=Math.floor(x);const r=Math.floor(y); if(r<0||r>=ROWS||c<0||c>=COLS) return true; return map[r][c]===0; }
 
-// Movement and collisions
 function tryTurn(){
   if(player.nextDir.x===0 && player.nextDir.y===0) return;
-
-  // First: if player is stopped (dir = 0), allow immediate movement if the next tile is free
+  
+// Se o jogador estiver parado (dir = 0), permitir movimento imediato se o próximo quadrado estiver livre
   const testNx = player.x + player.nextDir.x * 0.5;
   const testNy = player.y + player.nextDir.y * 0.5;
-  // handle wrap test for immediate movement
   if((player.dir.x === 0 && player.dir.y === 0) && !isWallAt(testNx,testNy)){
     player.dir = {...player.nextDir};
     player.nextDir = {x:0,y:0};
     return;
   }
 
-  // Otherwise, only allow turning when sufficiently centered on the perpendicular axis (classic Pac-Man behavior)
   const roundedX = Math.abs(player.x - Math.round(player.x))<0.15;
   const roundedY = Math.abs(player.y - Math.round(player.y))<0.15;
   if((player.nextDir.x!==0 && roundedY) || (player.nextDir.y!==0 && roundedX)){
