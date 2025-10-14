@@ -1,584 +1,179 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Top-Down Soccer — Protótipo Profissional (IA + Partículas + Som)</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>⚽ Futebol Legal — IA</title>
 <style>
-  :root{
-    --bg:#041021; --panel:#07142a; --accent:#00d1ff; --accent2:#ff5ca3; --muted:#9aa4b2;
+  body {
+    margin: 0;
+    text-align: center;
+    background-color: #ffe3ef;
+    font-family: "Comic Sans MS", sans-serif;
+    color: #ff7da4;
   }
-  *{box-sizing:border-box}
-  body{margin:0;min-height:100vh;background:linear-gradient(180deg,#02101b,#041022);display:flex;align-items:center;justify-content:center;font-family:Inter,system-ui,Arial;color:#e6eef8}
-  .container{width:1000px;max-width:96vw;padding:16px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:0 12px 40px rgba(0,0,0,0.7);display:grid;grid-template-columns:1fr 320px;gap:16px}
-  canvas{background:#072019;border-radius:8px;display:block;width:100%;height:auto;box-shadow:inset 0 6px 20px rgba(0,0,0,0.6)}
-  aside{padding:12px;display:flex;flex-direction:column;gap:12px}
-  h1{margin:0;font-size:16px;color:var(--accent)}
-  .row{display:flex;gap:8px;align-items:center}
-  .chip{background:rgba(255,255,255,0.02);padding:8px;border-radius:8px;font-weight:700}
-  .btn{padding:8px 10px;border-radius:8px;border:none;cursor:pointer;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#041025;font-weight:800}
-  .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.03);color:var(--muted)}
-  label{font-size:13px;color:var(--muted)}
-  .small{font-size:13px;color:var(--muted)}
-  .controls{display:grid;gap:6px}
-  footer{font-size:12px;color:var(--muted);margin-top:8px}
-  .slider{width:100%}
-  @media(max-width:980px){ .container{grid-template-columns:1fr} }
+  h1 { margin-top: 20px; color: #ff7da4; text-shadow: 1px 1px #fff; }
+  canvas {
+    background-color: #fff5f9;
+    border: 4px solid #ffbad9;
+    border-radius: 10px;
+    display: block;
+    margin: 20px auto;
+  }
+  #placar { font-size: 20px; margin-top: 10px; }
+  button {
+    background-color: #ffbad9;
+    color: #6e3f55;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: 0.3s;
+  }
+  button:hover { background-color: #ff7da4; color: white; }
 </style>
 </head>
 <body>
-  <div class="container">
-    <div>
-      <canvas id="field" width="820" height="520"></canvas>
-    </div>
-
-    <aside>
-      <h1>Top-Down Soccer — Protótipo Profissional</h1>
-
-      <div class="row">
-        <div class="chip">Time A: <span id="scoreA">0</span></div>
-        <div class="chip">Time B: <span id="scoreB">0</span></div>
-        <div style="margin-left:auto" class="small">Tempo: <span id="time">02:00</span></div>
-      </div>
-
-      <div class="controls">
-        <div class="row">
-          <button id="startBtn" class="btn">Iniciar / Reiniciar</button>
-          <button id="pauseBtn" class="btn ghost">Pausar</button>
-        </div>
-
-        <div>
-          <label>Tempo da partida (seg):</label>
-          <input id="matchTime" type="number" value="120" min="30" max="900" style="width:120px;border-radius:8px;padding:6px;background:rgba(255,255,255,0.02);border:none;color:var(--muted)">
-        </div>
-
-        <div class="row">
-          <label>IA Jogador B:</label>
-          <button id="toggleAI" class="btn ghost">Ativar IA</button>
-        </div>
-
-        <div>
-          <label>Agressividade IA</label>
-          <input id="aiAgg" type="range" min="0.3" max="2.0" step="0.05" value="1.0" class="slider">
-        </div>
-
-        <div>
-          <label>Força do chute</label>
-          <input id="kickStrength" type="range" min="150" max="1200" step="10" value="420" class="slider">
-        </div>
-
-        <div>
-          <label>Partículas (intensidade)</label>
-          <input id="particleMag" type="range" min="0" max="2" step="0.1" value="1.0" class="slider">
-        </div>
-
-        <div>
-          <label>Volume (0-1)</label>
-          <input id="volume" type="range" min="0" max="1" step="0.01" value="0.08" class="slider">
-        </div>
-
-        <div>
-          <label>Controles</label>
-          <div class="small">
-            <strong>Jogador A:</strong> W/A/S/D (mover) • F (chute forte) • G (chute fraco)<br>
-            <strong>Jogador B:</strong> ↑/←/↓/→ (mover) • "/" (chute forte) • "." (chute fraco)
-          </div>
-        </div>
-
-        <footer>
-          Protótipo com IA, partículas e áudio — tudo local, sem backend. Código comentado para personalizar.
-        </footer>
-      </div>
-    </aside>
-  </div>
+<h1>⚽ Futebol Legal 💖</h1>
+<div id="placar">Azul 0 x 0 Rosa</div>
+<canvas id="campo" width="600" height="400"></canvas>
+<button onclick="reiniciarJogo()">Reiniciar</button>
+<label><input type="checkbox" id="ativarIA" /> Ativar IA (solo)</label>
 
 <script>
-/* Top-Down Soccer — versão aprimorada
-   - IA com estados (perseguir bola / posicionar / recuar)
-   - Partículas para gol e chutes
-   - WebAudio procedural para efeitos
-   - Parâmetros na UI
-*/
+const canvas = document.getElementById("campo");
+const ctx = canvas.getContext("2d");
 
-(() => {
-  // Canvas
-  const canvas = document.getElementById('field');
-  const ctx = canvas.getContext('2d');
+const jogadorAzul = { x: 100, y: 200, cor: "#7daaff" };
+const jogadorRosa = { x: 500, y: 200, cor: "#ff7da4" };
+const bola = { x: 300, y: 200, dx: 0, dy: 0, raio: 10 };
 
-  // UI elements
-  const startBtn = document.getElementById('startBtn');
-  const pauseBtn = document.getElementById('pauseBtn');
-  const toggleAI = document.getElementById('toggleAI');
-  const scoreAEl = document.getElementById('scoreA');
-  const scoreBEl = document.getElementById('scoreB');
-  const timeEl = document.getElementById('time');
-  const matchTimeInput = document.getElementById('matchTime');
-  const kickInput = document.getElementById('kickStrength');
-  const aiAggInput = document.getElementById('aiAgg');
-  const particleMagInput = document.getElementById('particleMag');
-  const volumeInput = document.getElementById('volume');
+let golsAzul = 0;
+let golsRosa = 0;
+let iaAtiva = false;
 
-  // Field config
-  const FIELD_W = canvas.width;
-  const FIELD_H = canvas.height;
-  const CENTER_X = FIELD_W / 2;
-  const CENTER_Y = FIELD_H / 2;
-  const GOAL_W = 80;
-  const GOAL_H = 160;
+const keys = {};
+document.addEventListener("keydown", e => keys[e.key] = true);
+document.addEventListener("keyup", e => keys[e.key] = false);
 
-  // Game state
-  let scoreA = 0, scoreB = 0;
-  let matchSeconds = Number(matchTimeInput.value) || 120;
-  let remaining = matchSeconds;
-  let running = false;
-  let paused = false;
-  let lastTime = performance.now();
-  let aiEnabled = false;
+function desenharCampo() {
+  ctx.fillStyle = "#fff5f9";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.strokeStyle = "#ffbad9";
+  ctx.lineWidth = 3;
+  ctx.strokeRect(10, 10, 580, 380);
+  ctx.beginPath();
+  ctx.moveTo(300, 10);
+  ctx.lineTo(300, 390);
+  ctx.stroke();
+  ctx.fillStyle = "#ffbad9";
+  ctx.fillRect(0, 150, 10, 100);
+  ctx.fillRect(590, 150, 10, 100);
+}
 
-  // Physics params
-  let KICK_STRENGTH = Number(kickInput.value);
-  let AI_AGG = Number(aiAggInput.value);
-  let PARTICLE_MAG = Number(particleMagInput.value);
+function desenharJogador(j) {
+  ctx.fillStyle = j.cor;
+  ctx.beginPath();
+  ctx.arc(j.x, j.y, 15, 0, Math.PI * 2);
+  ctx.fill();
+}
 
-  // Ball
-  const ball = { x: CENTER_X, y: CENTER_Y, r: 9, vx: 0, vy: 0, maxSpeed: 900 };
+function desenharBola() {
+  ctx.fillStyle = "#f9c6e2";
+  ctx.beginPath();
+  ctx.arc(bola.x, bola.y, bola.raio, 0, Math.PI * 2);
+  ctx.fill();
+}
 
-  // Player factory
-  function createPlayer(x,y,color,team,controls){
-    return {
-      x,y,r:14,vx:0,vy:0,speed:220,color,team,controls,
-      kickCooldown:0,maxKickCooldown:360,
-      // AI fields
-      aiState: 'idle', // idle | attack | defend | intercept
-      aiTarget: {x,y}
-    };
+function moverJogadores() {
+  if (keys["w"] && jogadorAzul.y > 25) jogadorAzul.y -= 3;
+  if (keys["s"] && jogadorAzul.y < 375) jogadorAzul.y += 3;
+  if (keys["a"] && jogadorAzul.x > 25) jogadorAzul.x -= 3;
+  if (keys["d"] && jogadorAzul.x < 575) jogadorAzul.x += 3;
+
+  if (!iaAtiva) {
+    if (keys["ArrowUp"] && jogadorRosa.y > 25) jogadorRosa.y -= 3;
+    if (keys["ArrowDown"] && jogadorRosa.y < 375) jogadorRosa.y += 3;
+    if (keys["ArrowLeft"] && jogadorRosa.x > 25) jogadorRosa.x -= 3;
+    if (keys["ArrowRight"] && jogadorRosa.x < 575) jogadorRosa.x += 3;
+  } else {
+    controlarIA();
   }
+}
 
-  const playerAControls = { up:'w', left:'a', down:'s', right:'d', kickStrong:'f', kickSoft:'g' };
-  const playerBControls = { up:'ArrowUp', left:'ArrowLeft', down:'ArrowDown', right:'ArrowRight', kickStrong:'/', kickSoft:'.' };
+function controlarIA() {
+  let dx = bola.x - jogadorRosa.x;
+  let dy = bola.y - jogadorRosa.y;
+  if (Math.abs(dx) > 5) jogadorRosa.x += dx > 0 ? 2 : -2;
+  if (Math.abs(dy) > 5) jogadorRosa.y += dy > 0 ? 2 : -2;
+}
 
-  const playerA = createPlayer(CENTER_X - 160, CENTER_Y, '#00d1ff', 'A', playerAControls);
-  const playerB = createPlayer(CENTER_X + 160, CENTER_Y, '#ff5ca3', 'B', playerBControls);
+function moverBola() {
+  bola.x += bola.dx;
+  bola.y += bola.dy;
+  bola.dx *= 0.98;
+  bola.dy *= 0.98;
 
-  // Input
-  const keys = {};
-  window.addEventListener('keydown', e => { keys[e.key] = true; });
-  window.addEventListener('keyup', e => { keys[e.key] = false; });
+  if (bola.y - bola.raio < 10 || bola.y + bola.raio > 390) bola.dy *= -1;
 
-  // Audio: WebAudio context + helper functions
-  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  let masterGain = audioCtx.createGain(); masterGain.gain.value = Number(volumeInput.value) || 0.08; masterGain.connect(audioCtx.destination);
-  function setVolume(v){ masterGain.gain.value = v; }
-  volumeInput.addEventListener('input', ()=> setVolume(Number(volumeInput.value)));
-
-  function playBeep(freq=440, dur=0.06, type='sine', vol=0.05){
-    try {
-      const o = audioCtx.createOscillator();
-      const g = audioCtx.createGain();
-      o.type = type; o.frequency.value = freq;
-      g.gain.value = vol;
-      o.connect(g); g.connect(masterGain);
-      const now = audioCtx.currentTime;
-      o.start(now);
-      g.gain.setValueAtTime(vol, now);
-      g.gain.exponentialRampToValueAtTime(0.001, now + dur);
-      o.stop(now + dur + 0.02);
-    } catch(e){}
+  if (bola.x + bola.raio > 590 && bola.y > 150 && bola.y < 250) {
+    golsAzul++;
+    atualizarPlacar();
+    reiniciarPosicoes();
   }
-
-  function playKick(strength=1.0){
-    playBeep(650 + Math.random()*200, 0.06, 'triangle', 0.04 * strength);
-    spawnParticles(ball.x, ball.y, Math.round(8 * PARTICLE_MAG), '#ffd98f');
+  if (bola.x - bola.raio < 10 && bola.y > 150 && bola.y < 250) {
+    golsRosa++;
+    atualizarPlacar();
+    reiniciarPosicoes();
   }
-  function playBounce(){
-    playBeep(380 + Math.random()*90, 0.04, 'sine', 0.03);
+  if (bola.x - bola.raio < 10 || bola.x + bola.raio > 590) bola.dx *= -1;
+}
+
+function detectarColisao(j) {
+  const dx = bola.x - j.x;
+  const dy = bola.y - j.y;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+  if (dist < 25) {
+    bola.dx = dx * 0.2;
+    bola.dy = dy * 0.2;
   }
-  function playGoal(){
-    // quick cheer: chord-ish
-    const now = audioCtx.currentTime;
-    const freqs = [480, 600, 720];
-    freqs.forEach((f,i)=>{
-      const o = audioCtx.createOscillator();
-      const g = audioCtx.createGain();
-      o.frequency.value = f;
-      o.type = 'sawtooth';
-      g.gain.value = 0.02;
-      o.connect(g); g.connect(masterGain);
-      o.start(now + i*0.03);
-      g.gain.exponentialRampToValueAtTime(0.001, now + 0.6 + i*0.03);
-      o.stop(now + 0.65 + i*0.03);
-    });
-    // crowd whoosh
-    spawnParticles(ball.x, ball.y, Math.round(40 * PARTICLE_MAG), '#9bffcd');
-  }
+}
 
-  // Particles system (simple)
-  const particles = [];
-  function spawnParticles(x,y,count,color){
-    for(let i=0;i<count;i++){
-      particles.push({
-        x,y,
-        vx:(Math.random()*2-1)*3,
-        vy:(Math.random()*2-1)*3 - 1,
-        life: 600 + Math.random()*600,
-        age:0,
-        color,
-        size: 2 + Math.random()*3
-      });
-    }
-  }
-  function updateParticles(dt){
-    for(let i=particles.length-1;i>=0;i--){
-      const p = particles[i];
-      p.age += dt;
-      p.x += p.vx * dt/16;
-      p.y += p.vy * dt/16;
-      p.vy += 0.02 * dt/16; // gravity tiny
-      if(p.age >= p.life) particles.splice(i,1);
-    }
-  }
-  function drawParticles(ctx){
-    ctx.save();
-    particles.forEach(p=>{
-      const alpha = 1 - (p.age / p.life);
-      ctx.fillStyle = p.color;
-      ctx.globalAlpha = alpha;
-      ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
-    });
-    ctx.restore();
-    ctx.globalAlpha = 1;
-  }
+function atualizarPlacar() {
+  document.getElementById("placar").textContent = `Azul ${golsAzul} x ${golsRosa} Rosa`;
+}
 
-  // Utility functions
-  function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
-  function len(x,y){ return Math.sqrt(x*x+y*y); }
-  function normalize(x,y){ const L = Math.max(0.0001, Math.sqrt(x*x+y*y)); return {x:x/L, y:y/L}; }
+function reiniciarPosicoes() {
+  jogadorAzul.x = 100; jogadorAzul.y = 200;
+  jogadorRosa.x = 500; jogadorRosa.y = 200;
+  bola.x = 300; bola.y = 200; bola.dx = bola.dy = 0;
+}
 
-  // Player control & AI
-  function updatePlayerInput(p, dt){
-    let ax=0, ay=0;
-    if(keys[p.controls.up]) ay -= 1;
-    if(keys[p.controls.down]) ay += 1;
-    if(keys[p.controls.left]) ax -= 1;
-    if(keys[p.controls.right]) ax += 1;
-    const mag = Math.hypot(ax,ay);
-    if(mag > 0){
-      ax/=mag; ay/=mag;
-      p.vx = ax * p.speed;
-      p.vy = ay * p.speed;
-    } else {
-      p.vx *= 0.7; p.vy *= 0.7;
-      if(Math.abs(p.vx) < 6) p.vx = 0;
-      if(Math.abs(p.vy) < 6) p.vy = 0;
-    }
-    // kicks
-    if(p.kickCooldown <= 0){
-      if(keys[p.controls.kickStrong]){ playerKick(p, true); p.kickCooldown = p.maxKickCooldown; }
-      else if(keys[p.controls.kickSoft]){ playerKick(p, false); p.kickCooldown = p.maxKickCooldown; }
-    } else p.kickCooldown -= dt;
-  }
+function reiniciarJogo() {
+  golsAzul = 0; golsRosa = 0;
+  reiniciarPosicoes();
+  atualizarPlacar();
+}
 
-  // AI: state machine with steering
-  function updateAI(p, dt){
-    // parameters
-    const aggression = Number(aiAggInput.value);
-    // distances
-    const dx = ball.x - p.x, dy = ball.y - p.y; const distBall = Math.hypot(dx,dy);
-    // simple decision
-    if(distBall < 140 * aggression){
-      p.aiState = 'intercept';
-    } else {
-      // decide defend or position
-      // if our team is leading, more defensive
-      const teamLeading = (p.team === 'B') ? scoreB - scoreA : scoreA - scoreB;
-      if(teamLeading < -0.5) p.aiState = 'attack';
-      else if(teamLeading > 0.5) p.aiState = 'defend';
-      else p.aiState = 'position';
-    }
+document.getElementById("ativarIA").addEventListener("change", (e) => {
+  iaAtiva = e.target.checked;
+});
 
-    // behaviour
-    let target = {x: p.x, y: p.y};
-    if(p.aiState === 'intercept'){
-      // move toward predicted ball position
-      const prediction = predictBall(0.35 + 0.15 * Math.random()); // short prediction
-      target.x = prediction.x; target.y = prediction.y;
-      // try to kick if very close
-      if(distBall < 36 && p.kickCooldown <= 0){
-        // aim toward opponent goal
-        doKickAI(p);
-        p.kickCooldown = p.maxKickCooldown;
-      }
-    } else if(p.aiState === 'attack'){
-      // position between ball and opponent goal
-      const goalX = (p.team === 'A') ? FIELD_W - 20 : 20;
-      target.x = ball.x*0.6 + goalX*0.4;
-      target.y = ball.y*0.8 + CENTER_Y*0.2;
-    } else if(p.aiState === 'defend'){
-      // stay between ball and our goal
-      const ownGoalX = (p.team === 'A') ? 20 : FIELD_W - 20;
-      const towardGoalX = ball.x*0.35 + ownGoalX*0.65;
-      target.x = clamp(towardGoalX, 60, FIELD_W - 60);
-      target.y = ball.y;
-    } else { // position
-      // roam nearer to center of own half
-      target.x = (p.team === 'A') ? FIELD_W*0.35 : FIELD_W*0.65;
-      target.y = CENTER_Y + (Math.random()*60 - 30);
-    }
+function atualizar() {
+  desenharCampo();
+  moverJogadores();
+  moverBola();
+  detectarColisao(jogadorAzul);
+  detectarColisao(jogadorRosa);
+  desenharJogador(jogadorAzul);
+  desenharJogador(jogadorRosa);
+  desenharBola();
+  requestAnimationFrame(atualizar);
+}
 
-    // steering: desired velocity toward target
-    const desiredX = target.x - p.x;
-    const desiredY = target.y - p.y;
-    const nd = normalize(desiredX, desiredY);
-    const speed = p.speed * (0.85 + 0.3 * Math.random()) * (1 + (aggression-1)*0.3);
-    p.vx = nd.x * speed;
-    p.vy = nd.y * speed;
-
-    // cooldown
-    if(p.kickCooldown > 0) p.kickCooldown -= dt;
-  }
-
-  function predictBall(factor){
-    // predict simple future position by current velocity
-    return { x: ball.x + ball.vx * factor * 40, y: ball.y + ball.vy * factor * 40 };
-  }
-
-  function doKickAI(p){
-    const goalX = (p.team === 'A') ? FIELD_W - 10 : 10;
-    const goalY = CENTER_Y + (Math.random()*50 - 25); // small inaccuracy
-    const dx = goalX - ball.x, dy = goalY - ball.y; const dist = Math.hypot(dx,dy) || 1;
-    const nx = dx/dist, ny = dy/dist;
-    const strength = Number(kickInput.value) * (0.7 + Math.random()*0.7);
-    ball.vx += nx * (strength / 1200);
-    ball.vy += ny * (strength / 1200);
-    playKick(0.9);
-  }
-
-  // Player manual kick
-  function playerKick(p, strong){
-    const dx = ball.x - p.x, dy = ball.y - p.y; const dist = Math.hypot(dx,dy);
-    if(dist > p.r + ball.r + 6) return;
-    let nx=0, ny=0;
-    if(Math.hypot(p.vx,p.vy) > 3){
-      const mag = Math.hypot(p.vx,p.vy) || 1; nx = p.vx/mag; ny = p.vy/mag;
-    } else { nx = (ball.x - p.x)/(dist||1); ny = (ball.y - p.y)/(dist||1); }
-    const strength = Number(kickInput.value) * (strong ? 1.0 : 0.55);
-    ball.vx += nx * (strength / 1200);
-    ball.vy += ny * (strength / 1200);
-    p.vx -= nx*8; p.vy -= ny*8;
-    playKick(strong?1.0:0.6);
-  }
-
-  // collisions: player-ball
-  function resolvePlayerBallCollision(p){
-    const dx = ball.x - p.x, dy = ball.y - p.y; const dist = Math.hypot(dx,dy) || 0.0001;
-    const overlap = p.r + ball.r - dist;
-    if(overlap > 0){
-      const nx = dx/dist, ny = dy/dist;
-      ball.x += nx * overlap;
-      ball.y += ny * overlap;
-      ball.vx = (ball.vx*0.2) + (p.vx*0.9) + nx*0.3;
-      ball.vy = (ball.vy*0.2) + (p.vy*0.9) + ny*0.3;
-      // cap
-      const spd = Math.hypot(ball.vx, ball.vy); const max = ball.maxSpeed/1000;
-      if(spd > max){ ball.vx *= max/spd; ball.vy *= max/spd; }
-      // spawn micro particles
-      spawnParticles(ball.x, ball.y, Math.round(3 * PARTICLE_MAG), '#ffe9c2');
-    }
-  }
-
-  // world update
-  function updateWorld(dt){
-    // update AI params
-    AI_AGG = Number(aiAggInput.value);
-    PARTICLE_MAG = Number(particleMagInput.value);
-    KICK_STRENGTH = Number(kickInput.value);
-
-    // inputs
-    if(!aiEnabled) updatePlayerInput(playerB, dt);
-    else updateAI(playerB, dt);
-    updatePlayerInput(playerA, dt);
-
-    // integrate players
-    [playerA, playerB].forEach(p=>{
-      p.x += p.vx * dt / 1000;
-      p.y += p.vy * dt / 1000;
-      // clamp inside field
-      p.x = clamp(p.x, p.r + 8, FIELD_W - p.r - 8);
-      p.y = clamp(p.y, p.r + 8, FIELD_H - p.r - 8);
-    });
-
-    // ball physics integrate
-    ball.x += ball.vx * dt / 1000;
-    ball.y += ball.vy * dt / 1000;
-
-    // wall collisions and goal detection
-    if(ball.x - ball.r < 8){
-      const inGoalY = (ball.y > (CENTER_Y - GOAL_H/2) && ball.y < (CENTER_Y + GOAL_H/2));
-      if(inGoalY && ball.x - ball.r < 0){ goalScored('B'); return; }
-      ball.x = 8 + ball.r; ball.vx *= -0.58; ball.vy *= 0.9; playBounce();
-    }
-    if(ball.x + ball.r > FIELD_W - 8){
-      const inGoalY = (ball.y > (CENTER_Y - GOAL_H/2) && ball.y < (CENTER_Y + GOAL_H/2));
-      if(inGoalY && ball.x + ball.r > FIELD_W){ goalScored('A'); return; }
-      ball.x = FIELD_W - 8 - ball.r; ball.vx *= -0.58; ball.vy *= 0.9; playBounce();
-    }
-    if(ball.y - ball.r < 8){ ball.y = 8 + ball.r; ball.vy *= -0.72; playBounce(); }
-    if(ball.y + ball.r > FIELD_H - 8){ ball.y = FIELD_H - 8 - ball.r; ball.vy *= -0.72; playBounce(); }
-
-    // collisions with players
-    resolvePlayerBallCollision(playerA);
-    resolvePlayerBallCollision(playerB);
-
-    // friction to ball
-    ball.vx *= 0.97;
-    ball.vy *= 0.97;
-    if(Math.abs(ball.vx) < 0.001) ball.vx = 0;
-    if(Math.abs(ball.vy) < 0.001) ball.vy = 0;
-
-    // particles update
-    updateParticles(dt);
-  }
-
-  function goalScored(team){
-    if(team === 'A'){ scoreA++; playGoal(); } else { scoreB++; playGoal(); }
-    // pause, update UI, reset positions after short delay
-    running = false;
-    setTimeout(()=>{
-      // center ball & players
-      playerA.x = CENTER_X - 160; playerB.x = CENTER_X + 160;
-      playerA.y = playerB.y = CENTER_Y;
-      ball.x = CENTER_X; ball.y = CENTER_Y; ball.vx = 0; ball.vy = 0;
-      running = true;
-      lastTime = performance.now();
-    }, 900);
-  }
-
-  // draw functions
-  function drawField(){
-    ctx.clearRect(0,0,FIELD_W,FIELD_H);
-    // grass base
-    ctx.fillStyle = '#0b2a16'; ctx.fillRect(0,0,FIELD_W,FIELD_H);
-    // inner green
-    ctx.fillStyle = '#0c6b2e'; ctx.fillRect(8,8,FIELD_W-16,FIELD_H-16);
-
-    // markings
-    ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 3;
-    ctx.strokeRect(24,24,FIELD_W-48,FIELD_H-48);
-    ctx.beginPath(); ctx.moveTo(CENTER_X,24); ctx.lineTo(CENTER_X,FIELD_H-24); ctx.stroke();
-    ctx.beginPath(); ctx.arc(CENTER_X, CENTER_Y, 70, 0, Math.PI*2); ctx.stroke();
-
-    // goals area & boxes
-    ctx.fillStyle = '#02131a';
-    ctx.fillRect(0, CENTER_Y - GOAL_H/2, 24, GOAL_H);
-    ctx.fillRect(FIELD_W - 24, CENTER_Y - GOAL_H/2, 24, GOAL_H);
-    ctx.strokeStyle = 'rgba(255,255,255,0.6)'; ctx.lineWidth = 2;
-    ctx.strokeRect(24, CENTER_Y - GOAL_H/2 + 16, 120, GOAL_H - 32);
-    ctx.strokeRect(FIELD_W - 24 - 120, CENTER_Y - GOAL_H/2 + 16, 120, GOAL_H - 32);
-  }
-
-  function drawPlayer(p){
-    // shadow
-    ctx.beginPath(); ctx.fillStyle = 'rgba(0,0,0,0.22)'; ctx.ellipse(p.x, p.y + 8, p.r*0.9, p.r*0.45, 0, 0, Math.PI*2); ctx.fill();
-    // body
-    ctx.beginPath(); ctx.fillStyle = p.color; ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
-    ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.stroke();
-    // number/letter
-    ctx.fillStyle = '#021025'; ctx.font = 'bold 12px Inter, Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText(p.team, p.x, p.y);
-  }
-
-  function drawBall(){
-    ctx.save();
-    ctx.beginPath();
-    ctx.fillStyle = '#fff';
-    ctx.shadowBlur = 18; ctx.shadowColor = '#fff';
-    ctx.arc(ball.x, ball.y, ball.r+1.4, 0, Math.PI*2); ctx.fill();
-    ctx.restore();
-    ctx.beginPath(); ctx.fillStyle = '#f7f7f7'; ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI*2); ctx.fill();
-    ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(0,0,0,0.15)'; ctx.stroke();
-  }
-
-  function drawUI(){
-    scoreAEl.textContent = scoreA;
-    scoreBEl.textContent = scoreB;
-    timeEl.textContent = formatTime(Math.max(0, Math.ceil(remaining)));
-  }
-
-  function drawAll(){
-    drawField();
-    drawParticles(ctx);
-    drawBall();
-    drawPlayer(playerA);
-    drawPlayer(playerB);
-  }
-
-  // main loop
-  function loop(now){
-    const dt = now - lastTime;
-    lastTime = now;
-    if(running && !paused){
-      remaining -= dt / 1000;
-      if(remaining <= 0){
-        running = false; paused = true; remaining = 0;
-        // end match
-        setTimeout(()=> alert('Fim da partida! Placar: ' + scoreA + ' x ' + scoreB), 120);
-      }
-      updateWorld(dt);
-    }
-    drawAll();
-    drawUI();
-    requestAnimationFrame(loop);
-  }
-
-  // UI event handlers
-  startBtn.addEventListener('click', ()=>{
-    matchSeconds = Number(matchTimeInput.value) || 120;
-    remaining = matchSeconds;
-    scoreA = 0; scoreB = 0;
-    running = true; paused = false; lastTime = performance.now();
-    // center entities
-    playerA.x = CENTER_X - 160; playerB.x = CENTER_X + 160; playerA.y = playerB.y = CENTER_Y;
-    ball.x = CENTER_X; ball.y = CENTER_Y; ball.vx = ball.vy = 0;
-    updateUI();
-    // unlock audio on user gesture
-    try { audioCtx.resume(); } catch(e){}
-    playBeep(900,0.06,'sine', 0.04);
-  });
-  pauseBtn.addEventListener('click', ()=>{
-    if(!running) return;
-    paused = !paused;
-    pauseBtn.textContent = paused ? 'Retomar' : 'Pausar';
-  });
-  toggleAI.addEventListener('click', ()=>{
-    aiEnabled = !aiEnabled;
-    toggleAI.textContent = aiEnabled ? 'Desativar IA' : 'Ativar IA';
-  });
-
-  aiAggInput.addEventListener('input', ()=>{ /* AI aggressiveness live */ });
-  kickInput.addEventListener('input', ()=>{ KICK_STRENGTH = Number(kickInput.value); });
-  particleMagInput.addEventListener('input', ()=>{ PARTICLE_MAG = Number(particleMagInput.value); });
-  volumeInput.addEventListener('input', ()=>{ setVolume(Number(volumeInput.value)); });
-
-  // helpers
-  function formatTime(sec){ const m = Math.floor(sec/60).toString().padStart(2,'0'); const s = Math.floor(sec%60).toString().padStart(2,'0'); return `${m}:${s}`; }
-
-  // Start loop
-  lastTime = performance.now();
-  requestAnimationFrame(loop);
-
-  // Optional: allow initial start via keyboard
-  window.addEventListener('keydown', e => {
-    if(e.key === 'Enter' && !running){ startBtn.click(); }
-  });
-
-  // Expose some functions for debug (optional)
-  window._soccer = {
-    spawnParticles,
-    playKick,
-    setVolume
-  };
-
-})(); // end IIFE
+atualizar();
 </script>
 </body>
 </html>
